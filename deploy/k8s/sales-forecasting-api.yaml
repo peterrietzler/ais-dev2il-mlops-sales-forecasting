@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sales-forecasting-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sales-forecasting-api
+  template:
+    metadata:
+      labels:
+        app: sales-forecasting-api
+    spec:
+      containers:
+        - name: sales-forecasting-api
+          imagePullPolicy: IfNotPresent
+          image: sales-forecasting
+          args: ["run", "sales_forecasting/api.py"]
+          command: ["fastapi"]
+          env:
+          - name: MLFLOW_TRACKING_URI
+            value: "http://host.docker.internal:5000"
+          ports:
+            - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sales-forecasting-api
+spec:
+  selector:
+    app: sales-forecasting-api
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  type: ClusterIP

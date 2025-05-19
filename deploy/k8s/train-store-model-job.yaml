@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: download-latest-sales-data-job
+  namespace: default
+spec:
+  backoffLimit: 3
+  activeDeadlineSeconds: 600
+  template:
+    spec:
+      containers:
+      - name: download-latest-sales-data
+        image: sales-forecasting
+        imagePullPolicy: IfNotPresent
+        command: ["train-store-model", "/data", "__STORE_ID__", "--mlflow-tracking-uri", "http://host.docker.internal:5000"]
+        volumeMounts:
+        - name: local-folder
+          mountPath: /data
+      volumes:
+      - name: local-folder
+        hostPath:
+          path: /host_mnt/Users/peter.rietzler/Documents/private/dev2il/github/ais-dev2il-mlops-sales-forecasting/work
+          type: Directory
+      restartPolicy: OnFailure
